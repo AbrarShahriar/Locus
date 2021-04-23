@@ -1,6 +1,6 @@
 const log = console.log
 
-const LocalDB = (function () {
+const Locus = (function () {
   
   const db = function() {
     
@@ -21,39 +21,39 @@ const LocalDB = (function () {
 })();
 
 //init values
-LocalDB._db = {}
-LocalDB._templates = {}
-LocalDB._db.collections = {}
-LocalDB._dbName = ''
+Locus._db = {}
+Locus._templates = {}
+Locus._db.collections = {}
+Locus._dbName = ''
 
 //********MongoDB*********//
 
 
 //model
-LocalDB.model = function(colName, template) {
+Locus.model = function(colName, template) {
   let formattedColName = colName.toLowerCase() + "s"
 
-// log(LocalDB.get(LocalDB._dbName))
+// log(Locus.get(Locus._dbName))
 
-  LocalDB._templates[formattedColName] = template
+  Locus._templates[formattedColName] = template
   let collectionObj = {}
   
-  if(!LocalDB.get(LocalDB._dbName).collections[formattedColName]) {
-    Object.assign(LocalDB._db.collections, { [formattedColName]: {} })
-    LocalDB._update()
+  if(!Locus.get(Locus._dbName).collections[formattedColName]) {
+    Object.assign(Locus._db.collections, { [formattedColName]: {} })
+    Locus._update()
   }
   
   return function(obj) {
-    return LocalDB._mapObjToTemplate(LocalDB._templates[colName.toLowerCase() + "s"]["_template"], obj, colName)
+    return Locus._mapObjToTemplate(Locus._templates[colName.toLowerCase() + "s"]["_template"], obj, colName)
   }
 }
 
 //get collection
-LocalDB.collection = function(modelName) {
+Locus.collection = function(modelName) {
   const arr = []
   let formattedColName = modelName.toLowerCase() + "s"
   
-  const collection = {...LocalDB.get(LocalDB._dbName).collections[formattedColName]}
+  const collection = {...Locus.get(Locus._dbName).collections[formattedColName]}
 
   for(var key in collection) {
     arr.push(collection[key])
@@ -63,11 +63,11 @@ LocalDB.collection = function(modelName) {
 }
 
 //map passed obj to template
-LocalDB._mapObjToTemplate = function(template, obj, colName) {
+Locus._mapObjToTemplate = function(template, obj, colName) {
   let mappedObj = {}
   for(var key in template) {
     if(obj.hasOwnProperty(key)) {
-      if(LocalDB._valueTypeCheck(obj[key]) == template [key]) {
+      if(Locus._valueTypeCheck(obj[key]) == template [key]) {
         mappedObj[key] = obj[key]
       } else {
         log(key, " doesn't match", template[key])
@@ -77,12 +77,12 @@ LocalDB._mapObjToTemplate = function(template, obj, colName) {
     }
   }
   
-  return Object.assign(mappedObj, { _name_: colName ,save: function() { LocalDB.saveDoc(mappedObj._name_, this) }})
+  return Object.assign(mappedObj, { _name_: colName ,save: function() { Locus.saveDoc(mappedObj._name_, this) }})
 }
 
 //save document 
-LocalDB.saveDoc = function(colName, ref) {
-  LocalDB._db = LocalDB.get(LocalDB._dbName)
+Locus.saveDoc = function(colName, ref) {
+  Locus._db = Locus.get(Locus._dbName)
 
   var formattedColName = colName.toLowerCase() + "s";
 
@@ -91,28 +91,28 @@ LocalDB.saveDoc = function(colName, ref) {
   delete refObj._name_
   delete refObj.save
   
-  refObj._id = LocalDB.randomId(formattedColName)
+  refObj._id = Locus.randomId(formattedColName)
   
   const updatedCol = {
-    ...LocalDB._db.collections[formattedColName],
+    ...Locus._db.collections[formattedColName],
     [refObj._id]: refObj
   }
   
-  LocalDB._db.collections[formattedColName] = updatedCol
+  Locus._db.collections[formattedColName] = updatedCol
  
-  LocalDB._update()
+  Locus._update()
 }
 
 //temlate/schema
-LocalDB.Schema = function(template) {
-  this._template = LocalDB._assignType(template) 
+Locus.Schema = function(template) {
+  this._template = Locus._assignType(template) 
 }
 
 //********Type*********//
 
 
 //type checker for Schema
-LocalDB._typeCheck = function(value) {
+Locus._typeCheck = function(value) {
   let type = undefined
   if(typeof value === "function" || "Function") {
     type = Object.prototype.toString.call(value()).slice(8, -1)
@@ -124,17 +124,17 @@ LocalDB._typeCheck = function(value) {
 
 //check passed value type
 
-LocalDB._valueTypeCheck = function (value) {
+Locus._valueTypeCheck = function (value) {
   return Object.prototype.toString.call(value).slice(8,-1)
 }
 
 //type object
 
-LocalDB._type = function(value) {
-  this._type_ = LocalDB._typeCheck(value)
+Locus._type = function(value) {
+  this._type_ = Locus._typeCheck(value)
   let state = undefined
   this._set = function(newValue) {
-    if(this._type_ != LocalDB._typeCheck(newValue)) {
+    if(this._type_ != Locus._typeCheck(newValue)) {
       log("dont match type")
     } else {
       state = newValue
@@ -145,9 +145,9 @@ LocalDB._type = function(value) {
 }
 
 //type assign
-LocalDB._assignType = function(template) {
+Locus._assignType = function(template) {
   for(var key in template) {
-    template[key] = LocalDB._type(template[key]) 
+    template[key] = Locus._type(template[key]) 
   }
   return template
 }
@@ -157,23 +157,23 @@ LocalDB._assignType = function(template) {
 
 
 //create db only run once 
-LocalDB.createDB = function(dbName = LocalDB.randomName(), mode = "static") {
+Locus.createDB = function(dbName = Locus.randomName(), mode = "static") {
   
-  if(!LocalDB.get(dbName)) {
-    LocalDB.set(dbName, { _name: dbName, _mode: mode, collections: {} })
+  if(!Locus.get(dbName)) {
+    Locus.set(dbName, { _name: dbName, _mode: mode, collections: {} })
   }
 }
 
 //connect to the db
-LocalDB.connect = function(dbName, callback) {
+Locus.connect = function(dbName, callback) {
   
   if(typeof callback != "function") {
     return console.error("Please, pass a callback function to connect")
   }
   if(localStorage.getItem(dbName)) {
-    LocalDB._dbName = dbName
-    LocalDB._db = LocalDB.get(dbName)
-    LocalDB._db.collections = {}
+    Locus._dbName = dbName
+    Locus._db = Locus.get(dbName)
+    Locus._db.collections = {}
 
     callback()
   } else {
@@ -182,12 +182,12 @@ LocalDB.connect = function(dbName, callback) {
 }
 
 //delete all db
-LocalDB.reset = function() {
+Locus.reset = function() {
   localStorage.clear()
 }
 
 //delete one db
-LocalDB.delete = function(dbName) {
+Locus.delete = function(dbName) {
   if(!dbName || !localStorage.getItem(dbName)) {
     console.log("No such DB", dbName)
   } else if(localStorage.getItem(dbName)) {
@@ -198,16 +198,16 @@ LocalDB.delete = function(dbName) {
 }
 
 //update db
-LocalDB._update = function() {
-  LocalDB.set(LocalDB._db._name, LocalDB._db)
-  LocalDB._db = LocalDB.get(LocalDB._db._name)
+Locus._update = function() {
+  Locus.set(Locus._db._name, Locus._db)
+  Locus._db = Locus.get(Locus._db._name)
 }
 
 //********utils*********//
 
 
 //random db name 
-LocalDB.randomName = function() {
+Locus.randomName = function() {
   const arr = ["a", "b", "c", "d", "e", 1, 2, 3, 4, 5]
   let output = ""
 
@@ -218,7 +218,7 @@ LocalDB.randomName = function() {
 }
 
 //randomId 
-LocalDB.randomId = function() {
+Locus.randomId = function() {
   const arr = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   let output = ""
 
