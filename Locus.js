@@ -1,23 +1,7 @@
 const log = console.log
 
 const Locus = (function () {
-  
-  const db = function() {
-    
-  }
-  
-  //create
-  db.prototype.set = function(key, value) {
-    localStorage.setItem(key, JSON.stringify(value))
-    return this
-  }
-  
-  //read
-  db.prototype.get = function(key) {
-    return JSON.parse(localStorage.getItem(key))
-  }
-  
-  return new db()
+  return this
 })();
 
 //init values
@@ -26,14 +10,25 @@ Locus._templates = {}
 Locus._db.collections = {}
 Locus._dbName = ''
 
+//********set - get*********//
+
+//create
+Locus.set = function(key, value) {
+  localStorage.setItem(key, JSON.stringify(value))
+  return this
+}
+  
+//read
+Locus.get = function(key) {
+  return JSON.parse(localStorage.getItem(key))
+}
+
 //********MongoDB*********//
 
 
 //model
 Locus.model = function(colName, template) {
   let formattedColName = colName.toLowerCase() + "s"
-
-// log(Locus.get(Locus._dbName))
 
   Locus._templates[formattedColName] = template
   let collectionObj = {}
