@@ -17,7 +17,7 @@ Locus.createDB("db-name")
 ```
 
 
-```
+```javascript
 //CONNECT TO DB
 Locus.connect("db-name", () => {
   console.log("db connected");
@@ -25,7 +25,7 @@ Locus.connect("db-name", () => {
 ```
 
 
-```
+```javascript
 //1.GET SCHEMA 
 //2.USE IT TO CREATE A SCHEMA
 const Schema = Locus.Schema
@@ -38,13 +38,13 @@ const personSchema = new Schema({
 ```
 
 
-```
+```javascript
 //CREATE THE MODEL
 const Person = Locus.model("Person", personSchema)
 ```
 
 
-```
+```javascript
 //DUMMY DATA TO INSERT
 const personOne = new Person({
   name: "anto",
@@ -54,13 +54,13 @@ const personOne = new Person({
 ```
 
 
-```
+```javascript
 //SAVE IT IN COLLECTION!!
 personOne.save()
 ```
 
 
-```
+```javascript
 //SEE THE RESULT!!
 const persons = Locus.collection("Person")
 console.log(persons);
