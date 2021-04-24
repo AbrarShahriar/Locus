@@ -9,6 +9,13 @@ Locus._db = {}
 Locus._templates = {}
 Locus._db.collections = {}
 Locus._dbName = ''
+Locus._queryKeywords = {
+  $gt: (docs, key, val) => Locus.$gt(docs, key, val),
+  $gte: (docs, key, val) => Locus.$gte(docs, key, val),
+  $st: (docs, key, val) => Locus.$st(docs, key, val),
+  $ste: (docs, key, val) => Locus.$ste(docs, key, val)
+}
+
 
 //********set - get*********//
 
@@ -25,6 +32,22 @@ Locus.get = function(key) {
 
 //********MongoDB*********//
 
+// query helper
+Locus.$gt = function(docs, key, val) {
+  return docs.filter(doc => doc[key] > val)
+}
+
+Locus.$gte = function(docs, key, val) {
+  return docs.filter(doc => doc[key] >= val)
+}
+
+Locus.$st = function(docs, key, val) {
+  return docs.filter(doc => doc[key] < val)
+}
+
+Locus.$ste = function(docs, key, val) {
+  return docs.filter(doc => doc[key] <= val)
+}
 
 //model
 Locus.model = function(colName, template) {
@@ -38,9 +61,38 @@ Locus.model = function(colName, template) {
     Locus._update()
   }
   
-  return function(obj) {
-    return Locus._mapObjToTemplate(Locus._templates[colName.toLowerCase() + "s"]["_template"], obj, colName)
+  const mappedObjToTemplate = function(obj) {
+    return Locus._mapObjToTemplate(Locus._templates[formattedColName]["_template"], obj, colName)
   }
+  
+  //find
+  mappedObjToTemplate._colName_ = colName 
+  mappedObjToTemplate.find = Locus._find
+  
+  return mappedObjToTemplate
+}
+
+//query function
+
+//find
+Locus._find = function(filter = {}) {
+
+  const docs = Locus.collection(this._colName_)
+
+  const keysToSearchBy = Object.keys(filter)
+  
+  if(Locus._valueTypeCheck(filter[keysToSearchBy[0]]) == "Object") {
+    let queryHelper = Object.keys(filter[keysToSearchBy[0]])
+    if(Locus._queryKeywords.hasOwnProperty(queryHelper[0])) {
+      return Locus._queryKeywords[queryHelper[0]](docs, keysToSearchBy[0], filter[keysToSearchBy[0]][queryHelper[0]])
+    } else {
+      return log("Invalid key: ", keysToSearchBy[0])
+    }
+  }
+
+  const filteredDocs = docs.filter(doc => doc[keysToSearchBy[0]] == filter[keysToSearchBy[0]])
+
+  return filteredDocs
 }
 
 //get collection
@@ -60,15 +112,15 @@ Locus.collection = function(modelName) {
 //map passed obj to template
 Locus._mapObjToTemplate = function(template, obj, colName) {
   let mappedObj = {}
-  for(var key in template) {
-    if(obj.hasOwnProperty(key)) {
+  for(var key in obj) {
+    if(template.hasOwnProperty(key)) {
       if(Locus._valueTypeCheck(obj[key]) == template [key]) {
         mappedObj[key] = obj[key]
       } else {
         log(key, " doesn't match", template[key])
       }
     } else {
-      log(key, " not in template")
+      log(key, " not defined in Schema for ", colName)
     }
   }
   
