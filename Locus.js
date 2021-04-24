@@ -1,4 +1,4 @@
-const log = console.log
+// const log = console.log
 
 const Locus = (function () {
   return this
