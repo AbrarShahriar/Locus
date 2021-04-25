@@ -65,14 +65,41 @@ Locus.model = function(colName, template) {
     return Locus._mapObjToTemplate(Locus._templates[formattedColName]["_template"], obj, colName)
   }
   
-  //find
   mappedObjToTemplate._colName_ = colName 
+  
+   //find
   mappedObjToTemplate.find = Locus._find
+  //deleteById
+  mappedObjToTemplate.deleteById = Locus._deleteById
+
   
   return mappedObjToTemplate
 }
 
 //query function
+
+//deleteOne
+Locus._deleteById = function(filter = { _id: "" }) {
+  let formattedColName = this._colName_.toLowerCase() + "s"
+
+  Locus._db = Locus.get(Locus._dbName)
+
+  const docsObj = Locus._db["collections"][formattedColName]
+  
+  if(!docsObj[filter._id]) {
+    return console.error("No document found!")
+  }
+  
+  const deletedDoc = docsObj[filter._id]
+  
+  delete docsObj[filter._id]
+  
+  Object.assign(Locus._db.collections, { [formattedColName]: docsObj })
+  // log(Locus._db)
+  Locus._update()
+  
+  return deletedDoc
+}
 
 //find
 Locus._find = function(filter = {}) {
@@ -124,7 +151,12 @@ Locus._mapObjToTemplate = function(template, obj, colName) {
     }
   }
   
-  return Object.assign(mappedObj, { _name_: colName ,save: function() { Locus.saveDoc(mappedObj._name_, this) }})
+  return Object.assign(mappedObj, { 
+    _name_: colName, 
+    save: function() { 
+      return Locus.saveDoc(mappedObj._name_, this) 
+    }
+  })
 }
 
 //save document 
@@ -148,6 +180,8 @@ Locus.saveDoc = function(colName, ref) {
   Locus._db.collections[formattedColName] = updatedCol
  
   Locus._update()
+  
+  return refObj
 }
 
 //temlate/schema
