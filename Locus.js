@@ -71,12 +71,40 @@ Locus.model = function(colName, template) {
   mappedObjToTemplate.find = Locus._find
   //deleteById
   mappedObjToTemplate.deleteById = Locus._deleteById
+//updateById
+mappedObjToTemplate.updateById = Locus._updateById
 
   
   return mappedObjToTemplate
 }
 
 //query function
+
+//deleteOne
+Locus._updateById = function(filter = { _id: "" }, newObj = {}) {
+  let formattedColName = this._colName_.toLowerCase() + "s"
+
+  Locus._db = Locus.get(Locus._dbName)
+
+  const docsObj = Locus._db["collections"][formattedColName]
+  
+  if(!docsObj[filter._id]) {
+    return console.error("No document found!")
+  }
+  
+  const updatedDoc = docsObj[filter._id]
+  
+  docsObj[filter._id] = {
+    ...docsObj[filter._id],
+    ...newObj
+  }
+  
+  Object.assign(Locus._db.collections, { [formattedColName]: docsObj })
+  
+  Locus._update()
+  
+  return updatedDoc
+}
 
 //deleteOne
 Locus._deleteById = function(filter = { _id: "" }) {
@@ -95,7 +123,7 @@ Locus._deleteById = function(filter = { _id: "" }) {
   delete docsObj[filter._id]
   
   Object.assign(Locus._db.collections, { [formattedColName]: docsObj })
-  // log(Locus._db)
+  
   Locus._update()
   
   return deletedDoc
