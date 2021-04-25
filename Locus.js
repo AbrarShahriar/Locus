@@ -204,10 +204,10 @@ Locus._assignType = function(template) {
 
 
 //create db only run once 
-Locus.createDB = function(dbName = Locus.randomName(), mode = "static") {
+Locus.createDB = function(dbName = "db_" + Locus.randomName(), mode = "static") {
   
-  if(!Locus.get(dbName)) {
-    Locus.set(dbName, { _name: dbName, _mode: mode, collections: {} })
+  if(!Locus.get("db_"+dbName)) {
+    Locus.set("db_" + dbName, { _name: dbName, _mode: mode, collections: {} })
   }
 }
 
@@ -217,9 +217,9 @@ Locus.connect = function(dbName, callback) {
   if(typeof callback != "function") {
     return console.error("Please, pass a callback function to connect")
   }
-  if(localStorage.getItem(dbName)) {
-    Locus._dbName = dbName
-    Locus._db = Locus.get(dbName)
+  if(localStorage.getItem("db_"+dbName)) {
+    Locus._dbName = "db_" + dbName
+    Locus._db = Locus.get(Locus._dbName)
     Locus._db.collections = {}
 
     callback()
@@ -235,10 +235,10 @@ Locus.reset = function() {
 
 //delete one db
 Locus.delete = function(dbName) {
-  if(!dbName || !localStorage.getItem(dbName)) {
+  if(!dbName || !localStorage.getItem("db_" + dbName)) {
     console.log("No such DB", dbName)
-  } else if(localStorage.getItem(dbName)) {
-    localStorage.removeItem(dbName)
+  } else if(localStorage.getItem("db_"+dbName)) {
+    localStorage.removeItem("db_"+dbName)
   } else {
     console.error("Something went wrong")
   }
@@ -246,8 +246,8 @@ Locus.delete = function(dbName) {
 
 //update db
 Locus._update = function() {
-  Locus.set(Locus._db._name, Locus._db)
-  Locus._db = Locus.get(Locus._db._name)
+  Locus.set(Locus._dbName, Locus._db)
+  Locus._db = Locus.get(Locus._dbName)
 }
 
 //********utils*********//
@@ -261,7 +261,7 @@ Locus.randomName = function() {
   for (let i = 0; i < 5; i++) {
     output += arr[Math.floor(Math.random() * arr.length)]
   }
-  return "db_" + output
+  return output
 }
 
 //randomId 
