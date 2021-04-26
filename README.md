@@ -26,7 +26,7 @@ Locus.connect("db-name", () => {
 
 
 ```javascript
-//1.GET SCHEMA 
+//1.GET SCHEMA INTERFACE
 //2.USE IT TO CREATE A SCHEMA
 const Schema = Locus.Schema
 
@@ -47,7 +47,7 @@ const Person = Locus.model("Person", personSchema)
 ```javascript
 //DUMMY DATA TO INSERT
 const personOne = new Person({
-  name: "anto",
+  name: "Michael",
   age: 17,
   isAlive: true
 })
@@ -61,15 +61,32 @@ personOne.save()
 
 
 ```javascript
-//SEE THE RESULT!!
-const persons = Locus.collection("Person")
+//READ THE WHOLE COLLECTION
+const persons = Person.find()
 console.log(persons);
 ```
 
 
+```javascript
+//QUERY
+//FIND BY ONE FIELD
+Person.find({ _id: "id_102463da8jd" })
+```
 
 
+```javascript
+//FIND BY CONDITION eg. GREATER THAN, SMALLER THAN etc.
+Person.find({ age: { $gt: 15 } })
+```
 
 
+```javascript
+//DELETE ONE DOCUMENT
+Person.deleteById({ _id: "id_c101h1097eaj" })
+```
 
 
+```javascript
+//UPDATE ONE DOCUMENT
+Person.updateById({ _id: "id_102463da8jd" }, { name: "Lucifer" })
+```
